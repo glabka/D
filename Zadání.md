@@ -1,0 +1,19 @@
+#Zadání semestrální práce D
+##obecné:
+* do sql skriptu nepište jméno databáze! tabulky se musí umět vytvořit v libovolné databázi ve které se skript spustí.
+* [ ] Dostatečně objemná data, alespoň 10 záznamů na největší tabulku + všechny speciální případy.
+* 3. normální forma
+* každý bod dotazování == jeden sql-dotaz
+* Vstupní soubory:
+    * hodnoty oddělené čárkou (před a za čárkou může být libovolný počet mezer)
+    * předpoklad, že žádný řetězec neobsahuje znak čárky.
+* plnění databází přes standardní vstup (tj. půjde to i ručně)
+* nekonzistence ve vstupních souborech nepředpokládáme (resp. řešíme dle vlastního uvážení)
+* datum ve vstup. souboru má formát: YYYY-MM-DD
+* Název databáze, uživatelské jméno a heslo načítejte z proměnných prostředí OSD_DB, OSD_USERNAME a OSD_PASSWORD.
+* [ ] V každém skriptu vyplňte hlavičku obsahující účel skriptu, jména a e-maily autorů a aktuální semestr.
+* společné parametry:
+    * [ ] --insert
+    * [ ] --query
+    * [ ] --variant == vypíše variantu zadání na stdout
+    * [ ] --debug == vypisuje více ladících výpisů
