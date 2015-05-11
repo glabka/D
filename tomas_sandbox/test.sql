@@ -1,3 +1,11 @@
-use information_schema #existing database
-CREATE DATABASE neco1;
-#use laksdj #non-existing database
+
+
+
+CREATE TABLE IF NOT EXISTS neco1(
+    id_student INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (id_student)
+    );
+
+
+SHOW TABLES;
