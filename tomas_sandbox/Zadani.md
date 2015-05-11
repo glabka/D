@@ -1,5 +1,5 @@
-#Zadání semestrální práce D
-##obecné:
+# Zadání semestrální práce D
+## obecné:
 * do sql skriptu nepište jméno databáze! tabulky se musí umět vytvořit v libovolné databázi ve které se skript spustí.
 * [ ] Dostatečně objemná data, alespoň 10 záznamů na největší tabulku + všechny speciální případy.
 * 3. normální forma
@@ -17,3 +17,21 @@
     * [ ] --query
     * [ ] --variant == vypíše variantu zadání na stdout
     * [ ] --debug == vypisuje více ladících výpisů
+* návratové hodnoty:
+    * [ ] 0 - vše v pořádku
+    * [ ] 1 - špatné parametry
+    * [ ] 2 - prázdná odpověď z SQL serveru (popř. jiné neočekávané chování)
+    * [ ] 3 - chyba připojení k databázi / k serveru
+    * [ ] 10 a více - další vámi definované chybové stavy
+
+* **některé požadavky z úlohy pro BASH:**
+    * [ ] -h = vypíše nápovědu (help) a vrátí 0.
+    * komentáře v aj, nebo bez diakritiky.
+    * [ ] vhodné jméno napovídající použití
+    * POZOR = linuxovské ukončování řádku (jinak může skript dělat problémy)
+    * Vše v jednom souboru.
+
+## Varianta 2 ("kuchařka"):
+* poznámka: jméno pokrmu, surovin i prodejen mohou obsahovat mezery.
+* Jedna surovina může být prodávána ve více prodejnách a prodejna může prodávat více surovin.
+* Jméno autora se skládá ze jména a příjmení.
