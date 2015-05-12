@@ -41,7 +41,7 @@ while [ $# -ge 1 ]
         --query)
             prepare_database
    		;;
-		-v) # Version of task of imlementation of semestral work of OSD, FEE CTU
+		-v,--variant) # Variant of semestral work of OSD, FEE CTU, summer 2015
 			echo "2"
 			exit 0
 		;;
