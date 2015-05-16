@@ -3,6 +3,9 @@
 * do sql skriptu nepište jméno databáze! tabulky se musí umět vytvořit v libovolné databázi ve které se skript spustí.
 * [ ] Dostatečně objemná data, alespoň 10 záznamů na největší tabulku + všechny speciální případy.
 * 3. normální forma
+    * [x] 1. n.f. == všechna data jsou atomická
+    * [x] 2. n.f. == Rozklad tak, aby klíče byly jednoduché atributy
+    * [ ] 3. n.f. ==
 * každý bod dotazování == jeden sql-dotaz
 * Vstupní soubory:
     * hodnoty oddělené čárkou (před a za čárkou může být libovolný počet mezer)

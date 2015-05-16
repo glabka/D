@@ -1,0 +1,5 @@
+bit bucket - i githubovy login
+gitlab
+jsou i privatni
+
+crow_foot - IDEA to generuje přímo z databáze

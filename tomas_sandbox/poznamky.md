@@ -1,2 +1,1 @@
 # Poznámky
-* Pokud bych měl tři druhy tabulek, jednu tabulku jako obsah ledničky (id_suroviny [key], jmeno_suroviny, porodejna, datum), jednu tabulku jako seznam receptů (jméno pokrmu [id], jméno autora), a pak další tanulky se jménem odpovídající jménům pokrmu, ve kterých bude jaké suroviny + množství. Pozor, pak při smazání receptu musíme smazat i tu tabulku s tím jménem, a při změně jména musíme přejmenovat tutabulku.
