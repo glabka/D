@@ -1,3 +1,4 @@
    jméno pokrmu,    autor receptu,       surovina1, množství1, surovina2, množství2,surovina3, množství3
         2jméno pokrmu,    2autor receptu, 2surovina1, 2množství1, 2surovina2, 2množství2, 2surovina3, 2množství3
     3jméno pokrmu       , 3autor receptu, 3surovina1  ,  3množství1, 3surovina2, 3množství2,3surovina3  , 3množství3
+4jmeno pokrmu,          , 4surovina prvni, 4mnozstvi prvni    

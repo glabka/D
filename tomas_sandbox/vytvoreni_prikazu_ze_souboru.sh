@@ -11,52 +11,57 @@ function sql_insert_recipe {
     read -r author <<< "$parms"
     parms=$( tail -n +2 <<< "$parms" ) # deleting first line (already read). -n +2 == start form second line
 
+    # printing out first insert command
+    echo "-- one recipe:"
+    # if author is not empty string
+    if [ -n "$author" ];
+        then
+        echo "INSERT INTO recipes_list VALUES(NULL, '$name', '$author');"
+    else
+        echo "INSERT INTO recipes_list VALUES(NULL, '$name', NULL);"
+    fi
+
 
     # reading ingredients and weights
-    ingridient_boolean="FALSE";
+    ingridient_boolean="TRUE";
     # reading first ingredient - to initialize parms_recipes_ingredients
-    read -r line <<< "$parms"
-    parms_recipes_ingredients="'$line'"
-    parms=$( tail -n +2 <<< "$parms" ) # deleting first line (already read). -n +2 == start form second line
-
     while read -r line
     do
         if [ "$ingridient_boolean" = "TRUE" ];
             then
             # ingeredient
-            parms_recipes_ingredients="$parms_recipes_ingredients, '$line'"
-            ingridient_boolean="FALSE";
+            # if author is not empty string
+            if [ -n "$author" ];
+                then
+                echo "INSERT INTO recipes_ingredients VALUES((SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author='$author'), '$line'" #printing out first part of command
+            else
+                echo "INSERT INTO recipes_ingredients VALUES((SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author IS NULL), '$line'" #printing out first part of command
+            fi
+            ingridient_boolean="FALSE"
         else
         # weight
         # MOJE POZN.: zkontroluj, zda to je int
-        parms_recipes_ingredients="$parms_recipes_ingredients, $line"
-        ingridient_boolean="TRUE";
+
+            echo ", $line);"
+            ingridient_boolean="TRUE";
         fi
     done <<< "$parms"
 
 
     # místo tohoto echa si to budu přidávat do tmp souboru možná a pokud to proběhne dobře,
     # tak z tohoto tmp souboru to spustím, ať se to vykoná v databázi
-    echo "-- one recipe:"
 
-    echo "insert ... ${parms_recipes_ingredients}"
+    # echo "insert ... ${parms_recipes_ingredients}"
 
     # if author is null (prázdné...) pak IS NULL, jinak author=cemu...
-    # if author is empty string
-    if [ -n "$author"];
-        then
-        echo "INSERT INTO recipes_list VALUES(NULL, '$name', NULL);"
-        echo "INSERT INTO recipes_ingredients VALUES(
-            (SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author IS NULL),
-            '', 10);"
-    else
-        echo "INSERT INTO recipes_list VALUES(NULL, '$name', '$author');"
 
-    fi
+    # echo "INSERT INTO recipes_ingredients VALUES(
+    #     (SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author IS NULL),
+    #     '', 10);"
 
 }
 
-
+cat recept1.txt # debug
 sql_insert_file=$( mktemp )
 # echo "sql_insert_file == $sql_insert_file" # debug
 
