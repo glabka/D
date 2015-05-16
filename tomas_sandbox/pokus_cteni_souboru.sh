@@ -18,11 +18,11 @@ do
 
 	# tady bych to mohl poslat do dalsi fce, ktera bude na zpracování
 	# jednoho řádku toho souboru
+done <<< $( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' recept1.txt )# first delete spaces/tabs leading and ending spaces/tabs, after that spaces/tabs around commas
 # done < recept1.txt
 # done <<< $( sed 's/^ *//g' recept1.txt | sed 's/, */,/g'| sed 's/ *,/,/g' | sed 's/ *$//g' )
 # done <<< $( sed -r 's/^ *| *$//g' recept1.txt | sed -r 's/, *| *,/,/g' )  # first delete spaces leading and ending spaces, after that spaces around commas
 # done <<< $( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/,[ \t]*|[ \t]*,/,/g' recept1.txt )
-done <<< $( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' recept1.txt )# first delete spaces/tabs leading and ending spaces/tabs, after that spaces/tabs around commas
 
 
 # deleting leading spaces

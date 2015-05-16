@@ -12,9 +12,10 @@ CREATE TABLE IF NOT EXISTS fridge(
 
 CREATE TABLE IF NOT EXISTS recipes_list(
     id_recipe INT NOT NULL AUTO_INCREMENT,
-    recipe_name VARCHAR(100) NOT NULL UNIQUE, /*POZN MOJE.: možná z toho unique slevím*/
+    recipe_name VARCHAR(100) NOT NULL,
     author VARCHAR(100),
-    PRIMARY KEY(id_recipe)
+    PRIMARY KEY(id_recipe),
+    CONSTRAINT constraint_unique UNIQUE (recipe_name, author) /*There can be only one recipe of particular name by one author */
 );
 
 CREATE TABLE IF NOT EXISTS recipes_ingredients(
