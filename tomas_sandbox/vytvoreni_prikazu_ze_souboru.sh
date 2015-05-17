@@ -21,7 +21,6 @@ function sql_insert_recipe {
         echo "INSERT INTO recipes_list VALUES(NULL, '$name', NULL);"
     fi
 
-
     # reading ingredients and weights
     ingridient_boolean="TRUE";
     # reading first ingredient - to initialize parms_recipes_ingredients
@@ -46,19 +45,6 @@ function sql_insert_recipe {
             ingridient_boolean="TRUE";
         fi
     done <<< "$parms"
-
-
-    # místo tohoto echa si to budu přidávat do tmp souboru možná a pokud to proběhne dobře,
-    # tak z tohoto tmp souboru to spustím, ať se to vykoná v databázi
-
-    # echo "insert ... ${parms_recipes_ingredients}"
-
-    # if author is null (prázdné...) pak IS NULL, jinak author=cemu...
-
-    # echo "INSERT INTO recipes_ingredients VALUES(
-    #     (SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author IS NULL),
-    #     '', 10);"
-
 }
 
 cat recept1.txt # debug
@@ -72,11 +58,7 @@ do
 		then
 		break
 	fi
-    # echo "$line"
 	tmp=$( tr ',' '\n' <<< "$line" )
-	# echo "$tmp"
-	# echo "..........."
-
     sql_insert_recipe "$tmp" >> "$sql_insert_file"
 
 done <<< $( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' recept1.txt ) # first delete spaces/tabs leading and ending spaces/tabs, after that spaces/tabs around commas

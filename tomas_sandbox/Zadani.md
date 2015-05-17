@@ -5,7 +5,7 @@
 * 3. normální forma
     * [x] 1. n.f. == všechna data jsou atomická
     * [x] 2. n.f. == Rozklad tak, aby klíče byly jednoduché atributy
-    * [ ] 3. n.f. ==
+    * [ ] 3. n.f. == ?
 * každý bod dotazování == jeden sql-dotaz
 * Vstupní soubory:
     * hodnoty oddělené čárkou (před a za čárkou může být libovolný počet mezer)
@@ -16,9 +16,11 @@
 * Název databáze, uživatelské jméno a heslo načítejte z proměnných prostředí OSD_DB, OSD_USERNAME a OSD_PASSWORD.
 * [ ] V každém skriptu vyplňte hlavičku obsahující účel skriptu, jména a e-maily autorů a aktuální semestr.
 * společné parametry:
-    * [ ] --insert
+    * [x] --insert
+        * [ ] kontrola vstupu
     * [ ] --query
-    * [ ] --variant == vypíše variantu zadání na stdout
+        * [ ] kontrola vstupu
+    * [x] --variant == vypíše variantu zadání na stdout
     * [ ] --debug == vypisuje více ladících výpisů
 * návratové hodnoty:
     * [ ] 0 - vše v pořádku
@@ -30,7 +32,7 @@
 * **některé požadavky z úlohy pro BASH:**
     * [ ] -h = vypíše nápovědu (help) a vrátí 0.
     * komentáře v aj, nebo bez diakritiky.
-    * [ ] vhodné jméno napovídající použití
+    * [x] vhodné jméno napovídající použití
     * POZOR = linuxovské ukončování řádku (jinak může skript dělat problémy)
     * Vše v jednom souboru.
 
