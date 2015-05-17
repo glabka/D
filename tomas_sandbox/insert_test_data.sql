@@ -56,7 +56,7 @@ INSERT INTO fridge VALUES(NULL, 'tomatos', 100, '2015-10-07', 'Billa');
 -- inserting recipes to recipes_list
 INSERT INTO recipes_list VALUES(NULL, 'hamburger', 'Herr Hamburger');
 INSERT INTO recipes_list VALUES(NULL, 'steak', NULL);
-INSERT INTO recipes_list VALUES(NULL, 'bread with cheese', NULL);
+INSERT INTO recipes_list VALUES(NULL, 'bread with cheese', 'Jamie');
 INSERT INTO recipes_list VALUES(NULL, 'ham and eggs', 'Jamie');
 INSERT INTO recipes_list VALUES(NULL, 'bread with butter', 'Kendrick');
 -- inserting ingredients required for recipes into recipes_ingredients
@@ -95,13 +95,13 @@ INSERT INTO recipes_ingredients VALUES(
     'beaf', 10);
 -- bread with cheese, NULL
 INSERT INTO recipes_ingredients VALUES(
-    (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with cheese' AND author IS NULL), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
+    (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with cheese' AND author='Jamie'), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
     'bread', 100);
 INSERT INTO recipes_ingredients VALUES(
-    (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with cheese' AND author IS NULL), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
+    (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with cheese' AND author='Jamie'), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
     'cheese', 20);
 INSERT INTO recipes_ingredients VALUES(
-    (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with cheese' AND author IS NULL), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
+    (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with cheese' AND author='Jamie'), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
     'butter', 10);
 -- 'bread with butter', 'Kendrick'
 INSERT INTO recipes_ingredients VALUES(

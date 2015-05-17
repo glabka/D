@@ -97,9 +97,9 @@ function insert_recipes {
 
 
     if [ "$DEBUG_ON" = "TRUE" ];
-        echo "Genereted SQL commands:"
         then
-        cat "$sql_insert_file"
+        echo "Genereted SQL commands:" >&2
+        cat "$sql_insert_file" >&2
     fi
     run_sql "$sql_insert_file"
     rm "$sql_insert_file"
@@ -158,8 +158,8 @@ function insert_into_fridge {
 
     if [ "$DEBUG_ON" = "TRUE" ];
         then
-        echo "Genereted SQL commands:"
-        cat "$sql_insert_file"
+        echo "Genereted SQL commands:" >&2
+        cat "$sql_insert_file" >&2
     fi
     run_sql "$sql_insert_file"
     rm "$sql_insert_file"
@@ -203,7 +203,29 @@ function query_recipes {
 function query_shortest {
     # MOJE POZN.: zkontroluj asi date
     date="$1"
+    if [ "$DEBUG_ON" = "TRUE" ];
+        then
+        echo "DEBUGGING: list of recipes ordered in descending order by 'number_of_ingredients' and in ascending order by 'recipe_name':" >&2
+        sql_command_tmp="SELECT recipe_name,author,count AS number_of_ingredients FROM recipes_list JOIN
+            /*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
+            (SELECT id_recipe_fk, COUNT(*) AS count FROM (
+                /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
+                SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '$date'
+            ) AS T GROUP BY id_recipe_fk) AS T2
+        ON (id_recipe=id_recipe_fk) ORDER BY count DESC, recipe_name;"
+        run_sql_var "$sql_command_tmp" >&2
+    fi
 
+    echo "Recepe which uses the most ingredients in fridge with date <= $date:"
+    sql_command="/* Matching together id_recipes_fk with recipe_name and author (JOIN) and selecting first row (LIMIT 1). Order is descending by count and ascending by recipe_name.*/
+    SELECT recipe_name,author,count AS number_of_ingredients FROM recipes_list JOIN
+        /*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
+        (SELECT id_recipe_fk, COUNT(*) AS count FROM (
+            /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
+            SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '$date'
+        ) AS T GROUP BY id_recipe_fk) AS T2
+    ON (id_recipe=id_recipe_fk) ORDER BY count DESC, recipe_name ASC LIMIT 1;"
+    run_sql_var "$sql_command" # prints out recipe with most ingredients which are in fridge and which has date <= than $date
 }
 
 # # first parameter is <recipe>

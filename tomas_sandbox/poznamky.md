@@ -10,3 +10,5 @@
 * http://stackoverflow.com/questions/16460397/sql-insert-into-table-only-if-record-doesnt-exist
 * http://stackoverflow.com/questions/20971680/sql-server-insert-if-not-exist
 * možná ještě trochu upravit výpis funkce: query_recipes
+* "./food_manager --query recipes" by mělo najít recepty bez autora, tj. s NULL, což zatím nedělá
+* --debug => výpisy zapnuté tímto by měli jít asi na stderr

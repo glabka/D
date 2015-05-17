@@ -65,7 +65,7 @@ ON (id_recipe=id_recipe_fk);
 SELECT recipe_name,author FROM recipes_list JOIN
     /*Finding out id_recipe_fk of recipes with most ingredients in fridge matching constrains.*/
     (SELECT id_recipe_fk,MAX(COUNT) AS MAX_COUNT FROM (
-        /*Counting number of ingredients of propriate dates contained at the same time in fridge and recipe*/
+        /*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
         SELECT id_recipe_fk, COUNT(*) AS COUNT FROM (
             /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
             SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '2015-07-30'
@@ -73,5 +73,33 @@ SELECT recipe_name,author FROM recipes_list JOIN
     ) AS T2) as T3
 ON (id_recipe=id_recipe_fk);
 
+
+
+
+
 -- MOJE POZN.: měl bych udělat JOIN mezi recepes_list a těmi počty pro ty recepty, pak to seředit zaprvé podle
 -- velikosti MAX a potom podle abecedy a z toho vybrat první...
+
+/*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
+(SELECT id_recipe_fk, COUNT(*) AS count FROM (
+    /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
+    SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '2015-07-30'
+) AS T GROUP BY id_recipe_fk);
+
+SELECT recipe_name,author,count AS number_of_ingredients FROM recipes_list JOIN
+    /*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
+    (SELECT id_recipe_fk, COUNT(*) AS count FROM (
+        /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
+        SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '2015-07-30'
+    ) AS T GROUP BY id_recipe_fk) AS T2
+ON (id_recipe=id_recipe_fk) ORDER BY count DESC, recipe_name;
+
+-- Toto je asi konečná verze
+/* Matching together id_recipes_fk with recipe_name and author (JOIN) and selecting first row (LIMIT 1). Order is descending by count and ascending by recipe_name.*/
+SELECT recipe_name,author,count AS number_of_ingredients FROM recipes_list JOIN
+    /*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
+    (SELECT id_recipe_fk, COUNT(*) AS count FROM (
+        /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
+        SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '2015-07-30'
+    ) AS T GROUP BY id_recipe_fk) AS T2
+ON (id_recipe=id_recipe_fk) ORDER BY count DESC, recipe_name ASC LIMIT 1;
