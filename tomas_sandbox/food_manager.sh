@@ -5,13 +5,15 @@
 DEBUG_ON="FALSE"
 
 function run_sql_var {
+    # echo "run_sql_var" # debug
     mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" <<< "$1"
-    echo "DONE"
+    echo "DONE" >&2 # debug
 }
 
 function run_sql {
+    # echo "run_sql" # debug
     mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" < "$1"
-    echo "DONE"
+    echo "DONE" >&2 # debug
 }
 
 # Add tables requared for proper funcioning of functions insert and query
@@ -172,15 +174,63 @@ function insert {
         then
         insert_into_fridge "$2"
     else
-        echo "--insert can be used only as \"--insert recipes file_containing_recipe\" or \"\". For more information see help (--help)."
+        echo "--insert can be used only as \"--insert recipes file_containing_recipe\" or \"--insert fridge file_containing_food\". For more information see help (--help)."
         exit 1 # bad parameters
     fi
 }
 
-# function query {
+##############################
+###########################
+
+# first parameter is <author>
+function query_recipes {
+    # echo "query_recipes" # debug
+    sql_authors="SELECT recipe_name FROM recipes_list WHERE author='$1';"
+    recipe_names=$( run_sql_var "$sql_authors" ) # every line is name of one recipe
+    # echo "$recipe_names"
+    recipe_names=$( tail -n +2 <<< "$recipe_names" ) # deleting first line == name of column
+
+    echo "Recipes by author \"$1\":"
+
+    while read -r line
+    do
+        echo "Recipe name: $line"
+        run_sql_var "SELECT ingredient_name_r, weight_g_r FROM recipes_ingredients WHERE id_recipe_fk=(SELECT id_recipe FROM recipes_list WHERE author='$1' AND recipe_name='$line');" # prints out ingredient and weight
+    done <<< "$recipe_names"
+}
+
+# first parameter is <date>
+function query_shortest {
+    # MOJE POZN.: zkontroluj asi date
+    date="$1"
+
+}
+
+# # first parameter is <recipe>
+# function query_buy {
 #
 # }
 
+function query {
+    if [ "$1" = "recipes" ];
+        then
+        query_recipes "$2"
+    elif [ "$1" = "shortest" ];
+        then
+        query_shortest "$2"
+    elif [ "$1" = "buy" ];
+        then
+        query_buy "$2"
+    else
+        echo "--query can be used only as \"--query recipes <author>\" or \"--query shortest <date>\"or \"--query buy <recipe>\". For more information see help (--help)."
+        exit 1 # bad parameters
+    fi
+}
+
+
+
+################################
+##############################
 
 # Parsing arguments
 while [ $# -ge 1 ]
@@ -205,6 +255,8 @@ while [ $# -ge 1 ]
    		;;
         --query)
             prepare_database
+            query "$2" "$3"
+            exit 0
    		;;
 		-v|--variant) # Variant of semestral work of OSD, FEE CTU, summer 2015
 			echo "2"

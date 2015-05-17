@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS recipes_list(
 CREATE TABLE IF NOT EXISTS recipes_ingredients(
     id_recipe_fk INT,
     ingredient_name_r VARCHAR(100) NOT NULL, /* r == recipes*/
-    weight_g INT NOT NULL,
+    weight_g_r INT NOT NULL,
     FOREIGN KEY (id_recipe_fk)      /*POZN MOJE.: možná tady bude potřeba dát ještě něco jako UPDATE CASCADE atd.. Musí to hlavně splňovat ty požadavky jako normální forma 3...*/
         REFERENCES recipes_list(id_recipe)
         ON DELETE CASCADE,

@@ -9,3 +9,4 @@
   **existujícím jménem a autorem**. Dále musím pohlídat to, že příslušný recept/jídlo již může existovat...
 * http://stackoverflow.com/questions/16460397/sql-insert-into-table-only-if-record-doesnt-exist
 * http://stackoverflow.com/questions/20971680/sql-server-insert-if-not-exist
+* možná ještě trochu upravit výpis funkce: query_recipes
