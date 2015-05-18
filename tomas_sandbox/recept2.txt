@@ -1,4 +1,0 @@
-jméno pokrmu,    autor receptu,       surovina1, 11, surovina2, 12,surovina3, 13
-     2jméno pokrmu,    2autor receptu, 2surovina1, 21, 2surovina2, 22, 2surovina3, 23
- 3jméno pokrmu       , 3autor receptu, 3surovina1  ,  31, 3surovina2, 32, 3surovina3  , 33
-4jmeno pokrmu,          , 4surovina prvni, 41

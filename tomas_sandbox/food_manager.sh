@@ -4,15 +4,30 @@
 
 DEBUG_ON="FALSE"
 
+# first parameter is string containing sql commands for execution, rest is parameters for mysql program
 function run_sql_var {
     # echo "run_sql_var" # debug
-    mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" <<< "$1"
-    # echo "DONE" >&2 # debug
+    # echo "\$1 == $1" # debug
+    # echo "\${*:2} == ${*:2}" # debug
+    if [ -n "${*:2}" ];
+        then
+        mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" "${*:2}" <<< "$1" # "${*:2}" == passing all parameters but first
+    else
+        mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" <<< "$1"
+    fi    # echo "DONE" >&2 # debug
 }
 
+# first parameter is file_name of file containing sql commands for execution, rest is parameters for mysql program
 function run_sql {
     # echo "run_sql" # debug
-    mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" < "$1"
+    # echo "\$1 == $1" # debug
+    # echo "\${*:2} == ${*:2}" # debug
+    if [ -n "${*:2}" ];
+        then
+        mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" "${*:2}" < "$1" # "${*:2}" == passing all parameters but first
+    else
+        mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" < "$1"
+    fi
     # echo "DONE" >&2 # debug
 }
 
@@ -32,19 +47,27 @@ function sql_insert_recipe {
     # echo "........." # debug
     read -r name <<< "$parms"
     parms=$( tail -n +2 <<< "$parms" ) # deleting first line (already read). -n +2 == start form second line
-    read -r author <<< "$parms"
+    read -r author_first_name <<< "$parms"
+    parms=$( tail -n +2 <<< "$parms" ) # deleting first line (already read). -n +2 == start form second line
+    read -r author_last_name <<< "$parms"
     parms=$( tail -n +2 <<< "$parms" ) # deleting first line (already read). -n +2 == start form second line
 
     # printing out first insert command
     echo "-- one recipe:"
-    # if author is not empty string
-    if [ -n "$author" ];
+    # if author_first_name is not empty string
+    if [ -n "$author_first_name" ];
         then
-        echo "INSERT INTO recipes_list VALUES(NULL, '$name', '$author');"
+        printf "INSERT INTO recipes_list VALUES(NULL, '$name', '$author_first_name'"
     else
-        echo "INSERT INTO recipes_list VALUES(NULL, '$name', NULL);"
+        printf "INSERT INTO recipes_list VALUES(NULL, '$name', NULL"
     fi
-
+    # if author_last_name is not empty string
+    if [ -n "$author_last_name" ];
+        then
+        echo ", '$author_last_name');"
+    else
+        echo ", NULL);"
+    fi
 
     # reading ingredients and weights
     ingridient_boolean="TRUE";
@@ -54,13 +77,22 @@ function sql_insert_recipe {
         if [ "$ingridient_boolean" = "TRUE" ];
             then
             # ingeredient
-            # if author is not empty string
-            if [ -n "$author" ];
+            # if author_first_name is not empty string
+            if [ -n "$author_first_name" ];
                 then
-                echo "INSERT INTO recipes_ingredients VALUES((SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author='$author'), '$line'" #printing out first part of command
+                printf "INSERT INTO recipes_ingredients VALUES((SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author_first_name='$author_first_name'" #printing out first part of command
             else
-                echo "INSERT INTO recipes_ingredients VALUES((SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author IS NULL), '$line'" #printing out first part of command
+                printf "INSERT INTO recipes_ingredients VALUES((SELECT id_recipe FROM recipes_list WHERE recipe_name='$name' AND author_first_name IS NULL" #printing out first part of command
             fi
+            #if author_last_name is not empty string
+            if [ -n "$author_last_name" ];
+                then
+                printf " AND author_last_name='$author_last_name'"
+            else
+                printf " AND author_last_name IS NULL"
+            fi
+
+            echo "), '$line'"
             ingridient_boolean="FALSE"
         else
         # weight
@@ -91,7 +123,7 @@ function insert_recipes {
     		break
     	fi
     	tmp=$( tr ',' '\n' <<< "$line" )
-        sql_insert_recipe "$tmp" >> "$sql_insert_file"
+        sql_insert_recipe "$tmp" >> "$sql_insert_file"    # append to sql_insert_file
 
     done <<< $( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' "$1" ) # first delete spaces/tabs leading and ending spaces/tabs, after that spaces/tabs around commas
 
@@ -299,6 +331,45 @@ function query {
 ################################
 ##############################
 
+# Drop all three tables and recreate them
+function empty_database {
+    run_sql "empty_database.sql"
+    prepare_database
+}
+
+# fist parameter <table_name> is either "f" for fridge or "i" for recipes_ingredients or "r" recipes_list or "a" for all or combination of first three for example "ri"
+function show_tables {
+    var="$1"
+    if [ "$var" = "a" ];
+        then
+        var="fir"
+    fi
+
+    sql_show=""
+    if [[ "$var" = *"f"* ]]; # if contains "f"
+        then
+        sql_show="$sql_show
+SELECT * FROM fridge;"
+    fi
+
+    if [[ "$var" = *"r"* ]]; # if contains "r"
+        then
+        sql_show="$sql_show
+SELECT * FROM recipes_list;"
+    fi
+
+    if [[ "$var" = *"i"* ]]; # if contains "a"
+        then
+        sql_show="$sql_show
+SELECT * FROM recipes_ingredients;"
+    fi
+
+    if [ -n  "$sql_show" ];
+        then
+        run_sql_var "$sql_show" -vvv
+    fi
+}
+
 # Parsing arguments
 while [ $# -ge 1 ]
 	do
@@ -325,6 +396,14 @@ while [ $# -ge 1 ]
             query "$2" "$3" "$4"  # $4 is there because "--query --buy" can have two parameters <recipe> <author>
             exit 0
    		;;
+        --empty_database)
+            empty_database
+            exit 0
+        ;;
+        --show)
+            show_tables "$2"
+            exit 0
+        ;;
 		-v|--variant) # Variant of semestral work of OSD, FEE CTU, summer 2015
 			echo "2"
 			exit 0

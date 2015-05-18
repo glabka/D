@@ -41,5 +41,5 @@
 * poznámka: jméno pokrmu, surovin i prodejen mohou obsahovat mezery.
 * Jedna surovina může být prodávána ve více prodejnách a prodejna může prodávat více surovin.
 * Jméno autora se skládá ze jména a příjmení.
-    * [ ] (spíš to nic neznamená...) Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec
+    * [ ] Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec
     na jméno a přijímení.

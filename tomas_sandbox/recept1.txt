@@ -1,4 +1,4 @@
-   jméno pokrmu,    autor receptu,       surovina1, množství1, surovina2, množství2,surovina3, množství3
-        2jméno pokrmu,    2autor receptu, 2surovina1, 2množství1, 2surovina2, 2množství2, 2surovina3, 2množství3
-    3jméno pokrmu       , 3autor receptu, 3surovina1  ,  3množství1, 3surovina2, 3množství2,3surovina3  , 3množství3
-4jmeno pokrmu,          , 4surovina prvni, 4mnozstvi prvni    
+jméno pokrmu,    krestni1, prijmeni1,       surovina1, 11, surovina2, 12,surovina3, 13
+     2jméno pokrmu,    krestni2,     prijmeni2  , 2surovina1, 21, 2surovina2, 22, 2surovina3, 23
+ 3jméno pokrmu       ,krestni3,prijmeni3, 3surovina1  ,  31, 3surovina2, 32, 3surovina3  , 33
+4jmeno pokrmu,     ,     , 4surovina prvni, 41
