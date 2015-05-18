@@ -44,7 +44,7 @@ INSERT INTO fridge VALUES(NULL, 'bananas', 500, '2015-08-15', 'TESCO');
 INSERT INTO fridge VALUES(NULL, 'eggs', 150, '2015-09-03', 'Billa');
 INSERT INTO fridge VALUES(NULL, 'yoghurt', 10, '2015-08-22', 'Billa');
 INSERT INTO fridge VALUES(NULL, 'mushrooms', 320, '2015-12-01', 'Albert');
-INSERT INTO fridge VALUES(NULL, 'beef', 250, '2015-07-14', 'TESCO');
+INSERT INTO fridge VALUES(NULL, 'beef', 50, '2015-07-14', 'TESCO');
 INSERT INTO fridge VALUES(NULL, 'ham', 200, '2015-06-4', 'Albert');
 INSERT INTO fridge VALUES(NULL, 'ketchup', 400, '2014-01-20', 'Albert');
 -- duplicated food names
@@ -59,6 +59,8 @@ INSERT INTO recipes_list VALUES(NULL, 'steak', NULL);
 INSERT INTO recipes_list VALUES(NULL, 'bread with cheese', 'Jamie');
 INSERT INTO recipes_list VALUES(NULL, 'ham and eggs', 'Jamie');
 INSERT INTO recipes_list VALUES(NULL, 'bread with butter', 'Kendrick');
+INSERT INTO recipes_list VALUES(NULL, 'bread with butter', 'Jamie');
+
 -- inserting ingredients required for recipes into recipes_ingredients
 -- Hamburger, Herr Hamburger
 INSERT INTO recipes_ingredients VALUES(
@@ -69,7 +71,7 @@ INSERT INTO recipes_ingredients VALUES(
     'ketchup', 20);
 INSERT INTO recipes_ingredients VALUES(
     (SELECT id_recipe FROM recipes_list WHERE recipe_name='hamburger' AND author='Herr Hamburger'), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
-    'beef', 10);
+    'beef', 200);
 INSERT INTO recipes_ingredients VALUES(
     (SELECT id_recipe FROM recipes_list WHERE recipe_name='hamburger' AND author='Herr Hamburger'), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
     'mustard', 5);
@@ -110,3 +112,10 @@ INSERT INTO recipes_ingredients VALUES(
 INSERT INTO recipes_ingredients VALUES(
     (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with butter' AND author='Kendrick'), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
     'butter', 10);
+-- 'bread with butter', 'Jamie'
+INSERT INTO recipes_ingredients VALUES(
+    (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with butter' AND author='Jamie'), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
+    'bread', 90);
+INSERT INTO recipes_ingredients VALUES(
+    (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with butter' AND author='Jamie'), /* getting foreign key from recipews_list. columns recipe_name and author are uniqe. */
+    'butter', 15);

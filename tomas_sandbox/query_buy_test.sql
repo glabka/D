@@ -34,18 +34,17 @@ WHERE id_recipe_fk=@id_recipe_var;
 
 -- ----------------------------------------------------------------------------------------------------------------------
 -- Asi funkční dotaz
-SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with butter' AND author='Kendrick');
--- SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='hamburger' AND author='Herr Hamburger');
-
 -- for debug
-SELECT ingredient_name_r,weight_g_r,total_weight_g,weight_g_r-COALESCE(total_weight_g,0) AS buy FROM (
-    (SELECT *,SUM(weight_g) AS total_weight_g FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
+SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with butter' AND author='Kendrick');
+SELECT ingredient_name_r AS ingredient_name,weight_g_r AS weight_recipe,total_weight_fridge,weight_g_r-COALESCE(total_weight_fridge,0) AS buy FROM (
+    (SELECT *,SUM(weight_g) AS total_weight_fridge FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
      ON (T.ingredient_name=recipes_ingredients.ingredient_name_r))
 WHERE id_recipe_fk=@id_recipe_var;
 
 --
-SELECT ingredient_name_r,weight_g_r-COALESCE(total_weight_g,0) AS buy FROM (
-    (SELECT *,SUM(weight_g) AS total_weight_g FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
+SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with butter' AND author='Kendrick');
+SELECT ingredient_name_r AS ingredient_name,weight_g_r-COALESCE(total_weight_fridge,0) AS buy FROM (
+    (SELECT *,SUM(weight_g) AS total_weight_fridge FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
      ON (T.ingredient_name=recipes_ingredients.ingredient_name_r))
-WHERE id_recipe_fk=@id_recipe_var AND weight_g_r-COALESCE(total_weight_g,0) > 0;
+WHERE id_recipe_fk=@id_recipe_var AND weight_g_r-COALESCE(total_weight_fridge,0) > 0;
 -- ----------------------------------------------------------------------------------------------------------------------

@@ -185,8 +185,8 @@ function insert {
 # first parameter is <author>
 function query_recipes {
     # echo "query_recipes" # debug
-    sql_authors="SELECT recipe_name FROM recipes_list WHERE author='$1';"
-    recipe_names=$( run_sql_var "$sql_authors" ) # every line is name of one recipe
+    sql_recipe_names="SELECT recipe_name FROM recipes_list WHERE author='$1';"
+    recipe_names=$( run_sql_var "$sql_recipe_names" ) # every line is name of one recipe
     # echo "$recipe_names"
     recipe_names=$( tail -n +2 <<< "$recipe_names" ) # deleting first line == name of column
 
@@ -228,10 +228,49 @@ function query_shortest {
     run_sql_var "$sql_command" # prints out recipe with most ingredients which are in fridge and which has date <= than $date
 }
 
-# # first parameter is <recipe>
-# function query_buy {
-#
-# }
+
+# first parameter is <recipe>, second is <author>
+function query_buy_author {
+    recipe_name="$1"
+    author="$2"
+    if [ "$DEBUG_ON" = "TRUE" ];
+        then
+        # MOJE POZN.: ještě bych mohl vytisknout fridge, recipes_list, recipes_ingredients...
+        echo "Debuging info for recipe \"$recipe_name\" by author \"$author\":" >&2
+        sql_debug="
+        SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='$recipe_name' AND author='$author');
+        SELECT ingredient_name_r AS ingredient_name,weight_g_r AS weight_recipe,total_weight_fridge,weight_g_r-COALESCE(total_weight_fridge,0) AS buy FROM (
+            (SELECT *,SUM(weight_g) AS total_weight_fridge FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
+             ON (T.ingredient_name=recipes_ingredients.ingredient_name_r))
+        WHERE id_recipe_fk=@id_recipe_var;"
+        run_sql_var "$sql_debug" >&2
+    fi
+    echo "Ingredients to by for \"$recipe_name\" by author \"$author\":"
+    sql_command="
+    SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='$recipe_name' AND author='$author');
+    SELECT ingredient_name_r AS ingredient_name,weight_g_r-COALESCE(total_weight_fridge,0) AS buy FROM (
+        (SELECT *,SUM(weight_g) AS total_weight_fridge FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
+         ON (T.ingredient_name=recipes_ingredients.ingredient_name_r))
+    WHERE id_recipe_fk=@id_recipe_var AND weight_g_r-COALESCE(total_weight_fridge,0) > 0;"
+    run_sql_var "$sql_command"
+}
+
+# first parameter is <recipe>
+function query_buy {
+    recipe="$1"
+    sql_authors="SELECT author FROM recipes_list WHERE recipe_name='$recipe';"
+    authors=$( run_sql_var "$sql_authors" ) # every line is name of one author
+    authors=$( tail -n +2 <<< "$authors" ) # deleting first line == name of columns
+#     echo "AUTHORS:
+# $authors" >&2 # debug
+
+    while read -r line
+    do
+        query_buy_author "$recipe" "$line"
+        echo ""
+    done <<< "$authors"
+}
+
 
 function query {
     if [ "$1" = "recipes" ];
@@ -242,9 +281,15 @@ function query {
         query_shortest "$2"
     elif [ "$1" = "buy" ];
         then
-        query_buy "$2"
+        if [ -n "$3" ];
+            then
+            query_buy_author "$2" "$3"
+        else
+            query_buy "$2"
+        fi
+
     else
-        echo "--query can be used only as \"--query recipes <author>\" or \"--query shortest <date>\"or \"--query buy <recipe>\". For more information see help (--help)."
+        echo "--query can be used only as \"--query recipes <author>\" or \"--query shortest <date>\"or \"--query buy <recipe>\". For more information see help (--help)." >&2
         exit 1 # bad parameters
     fi
 }
@@ -277,7 +322,7 @@ while [ $# -ge 1 ]
    		;;
         --query)
             prepare_database
-            query "$2" "$3"
+            query "$2" "$3" "$4"  # $4 is there because "--query --buy" can have two parameters <recipe> <author>
             exit 0
    		;;
 		-v|--variant) # Variant of semestral work of OSD, FEE CTU, summer 2015

@@ -18,9 +18,9 @@
 * [ ] V každém skriptu vyplňte hlavičku obsahující účel skriptu, jména a e-maily autorů a aktuální semestr.
 * společné parametry:
     * [x] --insert
-        * [ ] kontrola vstupu
-    * [ ] --query
-        * [ ] kontrola vstupu
+        * [ ] kontrola parametrů a vstupního souboru
+    * [x] --query
+        * [ ] kontrola parametrů a výpis, když př. žádný takový recept neexistuje a podobně
     * [x] --variant == vypíše variantu zadání na stdout
     * [ ] --debug == vypisuje více ladících výpisů
 * návratové hodnoty:
@@ -41,5 +41,5 @@
 * poznámka: jméno pokrmu, surovin i prodejen mohou obsahovat mezery.
 * Jedna surovina může být prodávána ve více prodejnách a prodejna může prodávat více surovin.
 * Jméno autora se skládá ze jména a příjmení.
-    * [ ] Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec
+    * [ ] (spíš to nic neznamená...) Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec
     na jméno a přijímení.
