@@ -7,13 +7,13 @@ DEBUG_ON="FALSE"
 function run_sql_var {
     # echo "run_sql_var" # debug
     mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" <<< "$1"
-    echo "DONE" >&2 # debug
+    # echo "DONE" >&2 # debug
 }
 
 function run_sql {
     # echo "run_sql" # debug
     mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" < "$1"
-    echo "DONE" >&2 # debug
+    # echo "DONE" >&2 # debug
 }
 
 # Add tables requared for proper funcioning of functions insert and query

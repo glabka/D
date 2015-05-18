@@ -15,5 +15,5 @@
 * možná přepiš první sql příkaz query, co jsi napsal, tj. sql recepies <author> z kratézského součinu na join
 * pozor, "--query buy <recept>" asi předpokládá, že recept je unikátní, já mám ale unikátní jen kombinaci receptu a autora...
 * debug u query by mohl vždy vypsat i ty tabulky, se kterými pracuji... (a třeba fridge a podobně by mohl seřadit podle abecedy podle jména suroviny...)
-* ASI NE (v zadání ve stupním souboru je jen jena položka narozdíl od př. varianty 1) - Jméno autora se skládá ze jména a příjmení - Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec na jméno a přijímení.
+* Jméno autora se skládá ze jména a příjmení - Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec na jméno a přijímení.
 * přepíše error echo u query...
