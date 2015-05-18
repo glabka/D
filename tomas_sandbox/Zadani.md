@@ -1,7 +1,8 @@
 # Zadání semestrální práce D
 ## obecné:
 * do sql skriptu nepište jméno databáze! tabulky se musí umět vytvořit v libovolné databázi ve které se skript spustí.
-* [ ] Dostatečně objemná data, alespoň 10 záznamů na největší tabulku + všechny speciální případy.
+* [x] Dostatečně objemná data, alespoň 10 záznamů na největší tabulku
+    * [ ] + všechny speciální případy.
 * 3. normální forma
     * [x] 1. n.f. == všechna data jsou atomická
     * [x] 2. n.f. == Rozklad tak, aby klíče byly jednoduché atributy
@@ -40,3 +41,5 @@
 * poznámka: jméno pokrmu, surovin i prodejen mohou obsahovat mezery.
 * Jedna surovina může být prodávána ve více prodejnách a prodejna může prodávat více surovin.
 * Jméno autora se skládá ze jména a příjmení.
+    * [ ] Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec
+    na jméno a přijímení.

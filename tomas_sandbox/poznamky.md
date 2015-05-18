@@ -12,3 +12,7 @@
 * možná ještě trochu upravit výpis funkce: query_recipes
 * "./food_manager --query recipes" by mělo najít recepty bez autora, tj. s NULL, což zatím nedělá
 * --debug => výpisy zapnuté tímto by měli jít asi na stderr
+* možná přepiš první sql příkaz query, co jsi napsal, tj. sql recepies <author> z kratézského součinu na join
+* pozor, "--query buy <recept>" asi předpokládá, že recept je unikátní, já mám ale unikátní jen kombinaci receptu a autora...
+* debug u query by mohl vždy vypsat i ty tabulky, se kterými pracuji...
+* ASI NE (v zadání ve stupním souboru je jen jena položka narozdíl od př. varianty 1) - Jméno autora se skládá ze jména a příjmení - Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec na jméno a přijímení.
