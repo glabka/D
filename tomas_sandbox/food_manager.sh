@@ -315,8 +315,8 @@ function query_buy {
     tmp=$( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' <<< "$1" ) #deleting spaces
     tmp=$( tr ',' '\n' <<< "$tmp" ) # spliting to lines values separated by commas
     count_lines=$( wc -l <<< "$tmp" )
-    echo "\$count_lines == $count_lines"
-    echo "\$tmp = $tmp"
+    # echo "\$count_lines == $count_lines"
+    # echo "\$tmp = $tmp"
 
     if [ "$count_lines" -eq 1 ];
         then
@@ -331,8 +331,10 @@ function query_buy {
             echo "\$line == $line"
             first_and_last_name=$( sed -r -e 's/[ \t]+/\n/g' <<< "$line" ) # substitude tab and spaces for '\n'
             read -r first_name <<< "$first_and_last_names"
-            
-            # TODO
+            last_name=$( tail -n +2 <<< "$first_and_last_name" )
+            echo "\$first_name == $first_name" # debug
+            echo "\$last_name == $last_name" # debug
+            # TODO (Tady to nejak nefunguje - nad tím)
             query_buy_author "$recipe" "$line"
             echo ""
         done <<< "$authors"
