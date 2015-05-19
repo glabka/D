@@ -8,11 +8,13 @@ DEBUG_ON="FALSE"
 function run_sql_var {
     # echo "run_sql_var" # debug
     # echo "\$1 == $1" # debug
-    # echo "\${*:2} == ${*:2}" # debug
+    # echo "\${*:2} == ${*:2}" >&2 # debug
     if [ -n "${*:2}" ];
         then
+        # echo "run_sql_var s parametry" >&2 # debug
         mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" "${*:2}" <<< "$1" # "${*:2}" == passing all parameters but first
     else
+        # echo "run_sql_var bez parametrů" >&2 # debug
         mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" <<< "$1"
     fi    # echo "DONE" >&2 # debug
 }
@@ -214,20 +216,34 @@ function insert {
 ##############################
 ###########################
 
-# first parameter is <author>
+# first parameter is <author_first_name,author_last_name>
 function query_recipes {
+    # echo "\$1 == $1" # debug
+    tmp=$( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' <<< "$1" ) #deleting spaces
+    tmp=$( tr ',' '\n' <<< "$tmp" ) # spliting to lines values separated by commas
+    read -r first_name <<< "$tmp"
+    tmp=$( tail -n +2 <<< "$tmp" ) # deleting first line (already read). -n +2 == start form second line
+    last_name=$tmp
+    # echo "first_name = $first_name" # debug
+    # echo "last_name = $last_name" # debug
     # echo "query_recipes" # debug
-    sql_recipe_names="SELECT recipe_name FROM recipes_list WHERE author='$1';"
+    sql_recipe_names="SELECT recipe_name FROM recipes_list WHERE author_first_name='$first_name' AND author_last_name='$last_name';"
+    # echo "\$sql_recipe_names = $sql_recipe_names" >&2 # debug
     recipe_names=$( run_sql_var "$sql_recipe_names" ) # every line is name of one recipe
-    # echo "$recipe_names"
+    # echo "$recipe_names" # debug
     recipe_names=$( tail -n +2 <<< "$recipe_names" ) # deleting first line == name of column
 
-    echo "Recipes by author \"$1\":"
+    echo "Recipes by author \"$first_name $last_name\":"
+
+    if [ ! -n "recipe_names" ];
+        then
+        echo "No recipes for this author."
+    fi
 
     while read -r line
     do
         echo "Recipe name: $line"
-        run_sql_var "SELECT ingredient_name_r, weight_g_r FROM recipes_ingredients WHERE id_recipe_fk=(SELECT id_recipe FROM recipes_list WHERE author='$1' AND recipe_name='$line');" # prints out ingredient and weight
+        run_sql_var "SELECT ingredient_name_r AS ingredient_name, weight_g_r AS weight FROM recipes_ingredients WHERE id_recipe_fk=(SELECT id_recipe FROM recipes_list WHERE author_first_name='$first_name' AND author_last_name='$last_name' AND recipe_name='$line');" -t # prints out ingredient and weight
     done <<< "$recipe_names"
 }
 
@@ -235,30 +251,36 @@ function query_recipes {
 function query_shortest {
     # MOJE POZN.: zkontroluj asi date
     date="$1"
-    if [ "$DEBUG_ON" = "TRUE" ];
-        then
-        echo "DEBUGGING: list of recipes ordered in descending order by 'number_of_ingredients' and in ascending order by 'recipe_name':" >&2
-        sql_command_tmp="SELECT recipe_name,author,count AS number_of_ingredients FROM recipes_list JOIN
-            /*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
-            (SELECT id_recipe_fk, COUNT(*) AS count FROM (
-                /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
-                SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '$date'
-            ) AS T GROUP BY id_recipe_fk) AS T2
-        ON (id_recipe=id_recipe_fk) ORDER BY count DESC, recipe_name;"
-        run_sql_var "$sql_command_tmp" >&2
-    fi
 
     echo "Recepe which uses the most ingredients in fridge with date <= $date:"
-    sql_command="/* Matching together id_recipes_fk with recipe_name and author (JOIN) and selecting first row (LIMIT 1). Order is descending by count and ascending by recipe_name.*/
-    SELECT recipe_name,author,count AS number_of_ingredients FROM recipes_list JOIN
+    sql_command="/* Matching together id_recipes_fk with recipe_name and author_first_name,author_last_name (JOIN) and selecting first row (LIMIT 1). Order is descending by count and ascending by recipe_name.*/
+    SELECT recipe_name,author_first_name,author_last_name,count AS number_of_ingredients FROM recipes_list JOIN
         /*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
         (SELECT id_recipe_fk, COUNT(*) AS count FROM (
             /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
             SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '$date'
         ) AS T GROUP BY id_recipe_fk) AS T2
     ON (id_recipe=id_recipe_fk) ORDER BY count DESC, recipe_name ASC LIMIT 1;"
-    run_sql_var "$sql_command" # prints out recipe with most ingredients which are in fridge and which has date <= than $date
+
+
+    if [ "$DEBUG_ON" = "TRUE" ];
+        then
+        echo "DEBUGGING: list of recipes ordered in descending order by 'number_of_ingredients' and in ascending order by 'recipe_name':" >&2
+        sql_command_tmp="SELECT recipe_name,author_first_name,author_last_name,count AS number_of_ingredients FROM recipes_list JOIN
+            /*Counting number of ingredients of appropriate dates contained at the same time in fridge and recipe*/
+            (SELECT id_recipe_fk, COUNT(*) AS count FROM (
+                /*Table containing every food with date <= from given and that is contained in some recipe (if in more, there will be column for each)*/
+                SELECT * FROM fridge,recipes_ingredients WHERE fridge.ingredient_name=recipes_ingredients.ingredient_name_r AND fridge.use_by_date <= '$date'
+            ) AS T GROUP BY id_recipe_fk) AS T2
+        ON (id_recipe=id_recipe_fk) ORDER BY count DESC, recipe_name;"
+        run_sql_var "$sql_command_tmp" -vvv >&2
+        echo "Recepe which uses the most ingredients in fridge with date <= $date:"
+        run_sql_var "$sql_command" -vvv # prints out recipe with most ingredients which are in fridge and which has date <= than $date
+    else
+        run_sql_var "$sql_command" -t # prints out recipe with most ingredients which are in fridge and which has date <= than $date
+    fi
 }
+
 
 
 # first parameter is <recipe>, second is <author>
@@ -287,8 +309,55 @@ function query_buy_author {
     run_sql_var "$sql_command"
 }
 
-# first parameter is <recipe>
+# first parameter is <recipe,author_first_name,author_last_name>
 function query_buy {
+    echo "\$1 == $1"
+    tmp=$( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' <<< "$1" ) #deleting spaces
+    tmp=$( tr ',' '\n' <<< "$tmp" ) # spliting to lines values separated by commas
+    count_lines=$( wc -l <<< "$tmp" )
+    echo "\$count_lines == $count_lines"
+    echo "\$tmp = $tmp"
+
+    if [ "$count_lines" -eq 1 ];
+        then
+        # entered only recipe
+        echo "entered only recipe" >&2 # debug
+        recipe="$tmp"
+        sql_authors="SELECT author_first_name,author_last_name FROM recipes_list WHERE recipe_name='$recipe';"
+        authors=$( run_sql_var "$sql_authors" -ss ) # ss == without head with column names
+        echo "\$authors == $authors" # debug
+        while read -r line
+        do
+            echo "\$line == $line"
+            first_and_last_name=$( sed -r -e 's/[ \t]+/\n/g' <<< "$line" ) # substitude tab and spaces for '\n'
+            read -r first_name <<< "$first_and_last_names"
+            
+            # TODO
+            query_buy_author "$recipe" "$line"
+            echo ""
+        done <<< "$authors"
+    elif [ "$count_lines" -eq 2 ];
+        then
+        # recipe and author_first_name entered
+        echo "recipe and author_first_name entered" >&2 # debug
+    elif [ "$count_lines" -eq 3 ];
+        then
+        # recipe, author_first_name and author_last_name entered
+        echo "recipe, author_first_name and author_last_name entered" >&2 # debug
+    else
+        echo "Invalid number of values separated by comma in --query buy <recipe[,author_first_name][,author_last_name]>" >&2
+    fi
+
+
+    # old
+    read -r recipe <<< "$tmp"
+    tmp=$( tail -n +2 <<< "$tmp" ) # deleting first line (already read). -n +2 == start form second line
+    read -r first_name <<< "$tmp"
+    tmp=$( tail -n +2 <<< "$tmp" ) # deleting first line (already read). -n +2 == start form second line
+    read -r last_name <<< "$tmp"
+    tmp=$( tail -n +2 <<< "$tmp" ) # deleting first line (already read). -n +2 == start form second line
+
+
     recipe="$1"
     sql_authors="SELECT author FROM recipes_list WHERE recipe_name='$recipe';"
     authors=$( run_sql_var "$sql_authors" ) # every line is name of one author
@@ -401,6 +470,7 @@ while [ $# -ge 1 ]
             exit 0
         ;;
         --show)
+            # echo "--show" >&2 # debug
             show_tables "$2"
             exit 0
         ;;

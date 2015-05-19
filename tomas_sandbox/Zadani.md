@@ -1,5 +1,8 @@
 # Zadání semestrální práce D
 ## obecné:
+* Nakreslete dva E-R diagramy:
+    * [ ] diagram v Chenově notaci bez atributů (pouze entity a relace) a
+    * [ ] diagram v Crow's Foot notaci (s rozkreslenými relacemi, vč. atributů).
 * do sql skriptu nepište jméno databáze! tabulky se musí umět vytvořit v libovolné databázi ve které se skript spustí.
 * [x] Dostatečně objemná data, alespoň 10 záznamů na největší tabulku
     * [ ] + všechny speciální případy.
