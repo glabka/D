@@ -1,6 +1,7 @@
 #!/bin/bash
-# parsování vstupů
-# Pokud nebudou exitavat příslušné základní tabulky (tj. obsah_ledničky a recepty), tak je vytvoříme
+# AUTHORS:
+# Tomas Glabazna (glabatom@fel.cvut.cz), Michal Stracinsky ()
+# Written in May 2015, at my 4th semester (summer).
 
 DEBUG_ON="FALSE"
 
@@ -227,23 +228,44 @@ function query_recipes {
     # echo "first_name = $first_name" # debug
     # echo "last_name = $last_name" # debug
     # echo "query_recipes" # debug
-    sql_recipe_names="SELECT recipe_name FROM recipes_list WHERE author_first_name='$first_name' AND author_last_name='$last_name';"
-    # echo "\$sql_recipe_names = $sql_recipe_names" >&2 # debug
-    recipe_names=$( run_sql_var "$sql_recipe_names" ) # every line is name of one recipe
-    # echo "$recipe_names" # debug
-    recipe_names=$( tail -n +2 <<< "$recipe_names" ) # deleting first line == name of column
-
-    echo "Recipes by author \"$first_name $last_name\":"
-
-    if [ ! -n "recipe_names" ];
+    sql_recipe_names="SELECT recipe_name FROM recipes_list WHERE"
+    sql_author=""
+    if [ -n "$first_name" ];
         then
-        echo "No recipes for this author."
+        sql_author="$sql_author author_first_name='$first_name'"
+    else
+        sql_author="$sql_author author_first_name IS NULL"
     fi
 
+    if [ -n "$last_name" ];
+        then
+        sql_author="$sql_author AND author_last_name='$last_name'"
+    else
+        sql_author="$sql_author AND author_last_name IS NULL"
+    fi
+    sql_recipe_names="$sql_recipe_names $sql_author;"
+
+    # author_first_name='$first_name' AND author_last_name='$last_name';
+
+
+    # echo "\$sql_recipe_names = $sql_recipe_names" >&2 # debug
+    # echo "" >&2 # debug
+    recipe_names=$( run_sql_var "$sql_recipe_names" ) # every line is name of one recipe
+    # echo "\$recipe_names = $recipe_names" # debug
+    recipe_names=$( tail -n +2 <<< "$recipe_names" ) # deleting first line == name of column
+    echo "Recipes by author \"$first_name $last_name\":"
+
+    if [ ! -n "$recipe_names" ];
+        then
+        echo "No recipes for this author."
+        return
+    fi
+
+    # echo "neco" # debug
     while read -r line
     do
         echo "Recipe name: $line"
-        run_sql_var "SELECT ingredient_name_r AS ingredient_name, weight_g_r AS weight FROM recipes_ingredients WHERE id_recipe_fk=(SELECT id_recipe FROM recipes_list WHERE author_first_name='$first_name' AND author_last_name='$last_name' AND recipe_name='$line');" -t # prints out ingredient and weight
+        run_sql_var "SELECT ingredient_name_r AS ingredient_name, weight_g_r AS weight FROM recipes_ingredients WHERE id_recipe_fk=(SELECT id_recipe FROM recipes_list WHERE $sql_author AND recipe_name='$line');" -t # prints out ingredient and weight
     done <<< "$recipe_names"
 }
 
@@ -314,24 +336,32 @@ function query_buy_author {
         WHERE id_recipe_fk=@id_recipe_var;"
         run_sql_var "$sql_debug" -vvv >&2
     fi
-    echo "Ingredients for \"$recipe_name\" by author \"$first_name $last_name\""
+
     sql_command="$sql_start
     SELECT ingredient_name_r AS ingredient_name,weight_g_r-COALESCE(total_weight_fridge,0) AS buy FROM (
         (SELECT *,SUM(weight_g) AS total_weight_fridge FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
          ON (T.ingredient_name=recipes_ingredients.ingredient_name_r))
     WHERE id_recipe_fk=@id_recipe_var AND weight_g_r-COALESCE(total_weight_fridge,0) > 0;"
-    run_sql_var "$sql_command" -t
+    output=$( run_sql_var "$sql_command" -t )
+
+    if [ -n "$output" ];
+        then
+        echo "Ingredients for \"$recipe_name\" by author \"$first_name $last_name\""
+        echo "$output"
+    else
+        echo "Database contains no recipe \"$recipe_name\" by author \"$first_name $last_name\""
+    fi
 }
 
 # MOJE POZN.: je to možná trochu nelogické, že tady v této funci něco udělám a pak volám query_buy_author s třemi parametrami
 # MOJE POZN.: , ale je to přípraav na to, že možná udělám v budoucnu author_first_name a author_last_name volitelné, a pak se toto rozdělení bdue hodit.
 # first parameter is <recipe,author_first_name,author_last_name>
 function query_buy {
-    echo "\$1 == $1"
+    # echo "\$1 == $1" # debug
 
     if [[ "$1" =~ ^[^,]+,[^,]*,[^,]*$ ]]; # it is line that contains two commas (regular expression)
         then
-        echo "neco" # debug
+        # echo "neco" # debug
         tmp=$( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' <<< "$1" ) #deleting spaces
         tmp=$( tr ',' '\n' <<< "$tmp" ) # spliting to lines values separated by commas
         # recipe=$("$tmp" )
@@ -339,10 +369,10 @@ function query_buy {
         tmp=$( tail -n +2 <<< "$tmp" )
         read -r first_name <<< "$tmp"
         last_name=$( tail -n +2 <<< "$tmp" )
-        echo "\$tmp = '$tmp'" # debug
-        echo "\$recipe == '$recipe'" # debug
-        echo "\$first_name == '$first_name'" # debug
-        echo "\$last_name == '$last_name'" # debug
+        # echo "\$tmp = '$tmp'" # debug
+        # echo "\$recipe == '$recipe'" # debug
+        # echo "\$first_name == '$first_name'" # debug
+        # echo "\$last_name == '$last_name'" # debug
 
         query_buy_author "$recipe" "$first_name" "$last_name"
 
