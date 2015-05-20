@@ -97,7 +97,7 @@ INSERT INTO recipes_ingredients VALUES(
 INSERT INTO recipes_ingredients VALUES(
     (SELECT id_recipe FROM recipes_list WHERE recipe_name='steak' AND author_first_name IS NULL AND author_last_name IS NULL),
     'beaf', 10);
--- bread with cheese, NULL
+-- bread with cheese, Kenneth
 INSERT INTO recipes_ingredients VALUES(
     (SELECT id_recipe FROM recipes_list WHERE recipe_name='bread with cheese' AND author_first_name='Kenneth' AND author_last_name='McAvoy'),
     'bread', 100);

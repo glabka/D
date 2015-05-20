@@ -1,0 +1,6 @@
+hamburger, Herr, Hamburger,tomatos, 10,ketchup, 20,beef, 200,mustard, 5
+steak, , , beaf, 10
+bread with cheese, Kenneth, McAvoy,bread, 100, cheese, 20, butter, 10
+ham and eggs, Kenneth, McAvoy, eggs, 200, ham, 100,oil, 10, ketchup, 15, butter, 10
+bread with butter, Conan, Kendrick,bread, 100,butter, 10
+bread with butter, Kenneth, McAvoy, bread, 90,butter, 15  

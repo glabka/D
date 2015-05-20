@@ -1,5 +1,6 @@
 # Poznámky
-* budu muset zkontrolovat platnost dat, zadaných v souboru. To znamená **zkontrolovat každý řádek**.
+* Platnost dat bych mohl zkusit kontrolovat **pomocí regulárních výrazů**, tj if [[ "$var" =~ regex ]].
+  Budu muset zkontrolovat platnost dat, zadaných v souboru. To znamená **zkontrolovat každý řádek**.
   Kontrolu provedu tak, **zda ma dost parametrů** (minimálně př. pro recept: jméno, autor, igredience, hmotnost)
   a jestli to je **sudé** (počet by měl být sudý) a jestli něco **není prázdné**, abych tam neměl NULLy.
   Až potom, co zkontroluji všechny řádky je budu moct začít vykonávat. Proto si výsledky jednotlivých
@@ -14,7 +15,7 @@
 * --debug => výpisy zapnuté tímto by měli jít asi na stderr
 * možná přepiš první sql příkaz query, co jsi napsal, tj. sql recepies <author> z kratézského součinu na join
 * debug u query by mohl vždy vypsat i ty tabulky, se kterými pracuji... (a třeba fridge a podobně by mohl seřadit podle abecedy podle jména suroviny...)
-* Jméno autora se skládá ze jména a příjmení - Toto možná znamená, že aby byla splněna podmínka atomicity, tak by měl být zvlášť sloupec na jméno a přijímení.
-* přepíše error echo u query...
-* určitě bych měl ještě pořešit návratové hodnoty a především to, jak zjistit návratovou hodnotu z $( run_my_sql ... ), jelikož
-  to je subshell či co...
+
+* určitě bych měl ještě pořešit návratové hodnoty a především to, jak zjistit návratovou hodnotu z $( run_my_sql ...), jelikož to je subshell či co...
+* insert_test_data.sql bych měl přepsat do vstupních souborů recepty.txt a jidla.txt
+*

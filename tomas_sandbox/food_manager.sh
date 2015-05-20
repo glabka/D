@@ -9,7 +9,7 @@ function run_sql_var {
     # echo "run_sql_var" # debug
     # echo "\$1 == $1" # debug
     # echo "\${*:2} == ${*:2}" >&2 # debug
-    if [ -n "${*:2}" ];
+    if [ -n "${*:2}" ]; # "${*:2}" == passing all parameters but first
         then
         # echo "run_sql_var s parametry" >&2 # debug
         mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD" "${*:2}" <<< "$1" # "${*:2}" == passing all parameters but first
@@ -286,92 +286,70 @@ function query_shortest {
 # first parameter is <recipe>, second is <author>
 function query_buy_author {
     recipe_name="$1"
-    author="$2"
+    first_name="$2"
+    last_name="$3"
+
+    if [ -n "$first_name" ];
+        then
+        sql_start="SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='$recipe_name' AND author_first_name='$first_name'"
+    else
+        sql_start="SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='$recipe_name' AND author_first_name IS NULL"
+    fi
+
+    if [ -n "$last_name" ];
+        then
+        sql_start="$sql_start AND author_last_name='$last_name');"
+    else
+        sql_start="$sql_start AND author_last_name IS NULL);"
+    fi
+
     if [ "$DEBUG_ON" = "TRUE" ];
         then
         # MOJE POZN.: ještě bych mohl vytisknout fridge, recipes_list, recipes_ingredients...
-        echo "Debuging info for recipe \"$recipe_name\" by author \"$author\":" >&2
-        sql_debug="
-        SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='$recipe_name' AND author='$author');
+        echo "Ingredients for \"$recipe_name\" by author \"$first_name $last_name\""
+        sql_debug="$sql_start
         SELECT ingredient_name_r AS ingredient_name,weight_g_r AS weight_recipe,total_weight_fridge,weight_g_r-COALESCE(total_weight_fridge,0) AS buy FROM (
             (SELECT *,SUM(weight_g) AS total_weight_fridge FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
              ON (T.ingredient_name=recipes_ingredients.ingredient_name_r))
         WHERE id_recipe_fk=@id_recipe_var;"
-        run_sql_var "$sql_debug" >&2
+        run_sql_var "$sql_debug" -vvv >&2
     fi
-    echo "Ingredients to by for \"$recipe_name\" by author \"$author\":"
-    sql_command="
-    SET @id_recipe_var := (SELECT id_recipe FROM recipes_list WHERE recipe_name='$recipe_name' AND author='$author');
+    echo "Ingredients for \"$recipe_name\" by author \"$first_name $last_name\""
+    sql_command="$sql_start
     SELECT ingredient_name_r AS ingredient_name,weight_g_r-COALESCE(total_weight_fridge,0) AS buy FROM (
         (SELECT *,SUM(weight_g) AS total_weight_fridge FROM fridge GROUP BY ingredient_name) AS T RIGHT JOIN recipes_ingredients
          ON (T.ingredient_name=recipes_ingredients.ingredient_name_r))
     WHERE id_recipe_fk=@id_recipe_var AND weight_g_r-COALESCE(total_weight_fridge,0) > 0;"
-    run_sql_var "$sql_command"
+    run_sql_var "$sql_command" -t
 }
 
+# MOJE POZN.: je to možná trochu nelogické, že tady v této funci něco udělám a pak volám query_buy_author s třemi parametrami
+# MOJE POZN.: , ale je to přípraav na to, že možná udělám v budoucnu author_first_name a author_last_name volitelné, a pak se toto rozdělení bdue hodit.
 # first parameter is <recipe,author_first_name,author_last_name>
 function query_buy {
     echo "\$1 == $1"
-    tmp=$( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' <<< "$1" ) #deleting spaces
-    tmp=$( tr ',' '\n' <<< "$tmp" ) # spliting to lines values separated by commas
-    count_lines=$( wc -l <<< "$tmp" )
-    # echo "\$count_lines == $count_lines"
-    # echo "\$tmp = $tmp"
 
-    if [ "$count_lines" -eq 1 ];
+    if [[ "$1" =~ ^[^,]+,[^,]*,[^,]*$ ]]; # it is line that contains two commas (regular expression)
         then
-        # entered only recipe
-        echo "entered only recipe" >&2 # debug
-        recipe="$tmp"
-        sql_authors="SELECT author_first_name,author_last_name FROM recipes_list WHERE recipe_name='$recipe';"
-        authors=$( run_sql_var "$sql_authors" -ss ) # ss == without head with column names
-        echo "\$authors == $authors" # debug
-        while read -r line
-        do
-            echo "\$line == $line"
-            first_and_last_name=$( sed -r -e 's/[ \t]+/\n/g' <<< "$line" ) # substitude tab and spaces for '\n'
-            read -r first_name <<< "$first_and_last_names"
-            last_name=$( tail -n +2 <<< "$first_and_last_name" )
-            echo "\$first_name == $first_name" # debug
-            echo "\$last_name == $last_name" # debug
-            # TODO (Tady to nejak nefunguje - nad tím)
-            query_buy_author "$recipe" "$line"
-            echo ""
-        done <<< "$authors"
-    elif [ "$count_lines" -eq 2 ];
-        then
-        # recipe and author_first_name entered
-        echo "recipe and author_first_name entered" >&2 # debug
-    elif [ "$count_lines" -eq 3 ];
-        then
-        # recipe, author_first_name and author_last_name entered
-        echo "recipe, author_first_name and author_last_name entered" >&2 # debug
+        echo "neco" # debug
+        tmp=$( sed -r -e 's/^[ \t]*|[ \t]*$//g' -e 's/[ \t]*,[ \t]*/,/g' <<< "$1" ) #deleting spaces
+        tmp=$( tr ',' '\n' <<< "$tmp" ) # spliting to lines values separated by commas
+        # recipe=$("$tmp" )
+        read -r recipe <<< "$tmp"
+        tmp=$( tail -n +2 <<< "$tmp" )
+        read -r first_name <<< "$tmp"
+        last_name=$( tail -n +2 <<< "$tmp" )
+        echo "\$tmp = '$tmp'" # debug
+        echo "\$recipe == '$recipe'" # debug
+        echo "\$first_name == '$first_name'" # debug
+        echo "\$last_name == '$last_name'" # debug
+
+        query_buy_author "$recipe" "$first_name" "$last_name"
+
     else
-        echo "Invalid number of values separated by comma in --query buy <recipe[,author_first_name][,author_last_name]>" >&2
+        echo "Error: Invalid number of values separated by comma in --query buy <recipe,author_first_name,author_last_name> or empty \"recipe\"." >&2
+
     fi
-
-
-    # old
-    read -r recipe <<< "$tmp"
-    tmp=$( tail -n +2 <<< "$tmp" ) # deleting first line (already read). -n +2 == start form second line
-    read -r first_name <<< "$tmp"
-    tmp=$( tail -n +2 <<< "$tmp" ) # deleting first line (already read). -n +2 == start form second line
-    read -r last_name <<< "$tmp"
-    tmp=$( tail -n +2 <<< "$tmp" ) # deleting first line (already read). -n +2 == start form second line
-
-
-    recipe="$1"
-    sql_authors="SELECT author FROM recipes_list WHERE recipe_name='$recipe';"
-    authors=$( run_sql_var "$sql_authors" ) # every line is name of one author
-    authors=$( tail -n +2 <<< "$authors" ) # deleting first line == name of columns
-#     echo "AUTHORS:
-# $authors" >&2 # debug
-
-    while read -r line
-    do
-        query_buy_author "$recipe" "$line"
-        echo ""
-    done <<< "$authors"
 }
 
 
@@ -420,19 +398,19 @@ function show_tables {
     if [[ "$var" = *"f"* ]]; # if contains "f"
         then
         sql_show="$sql_show
-SELECT * FROM fridge;"
+SELECT * FROM fridge ORDER BY ingredient_name ASC, use_by_date ASC;"
     fi
 
     if [[ "$var" = *"r"* ]]; # if contains "r"
         then
         sql_show="$sql_show
-SELECT * FROM recipes_list;"
+SELECT * FROM recipes_list ORDER BY author_first_name, author_last_name,recipe_name;"
     fi
 
     if [[ "$var" = *"i"* ]]; # if contains "a"
         then
         sql_show="$sql_show
-SELECT * FROM recipes_ingredients;"
+SELECT * FROM recipes_ingredients ORDER BY id_recipe_fk, ingredient_name_r;"
     fi
 
     if [ -n  "$sql_show" ];
@@ -452,7 +430,7 @@ while [ $# -ge 1 ]
         --debug)
             DEBUG_ON="TRUE"
         ;;
-		--insert)
+        --insert)
             echo "insert..." #debug
             if [ $# -lt 3 ]; # $1 is --insert, and at least two more arguments are required
                 then
@@ -480,7 +458,7 @@ while [ $# -ge 1 ]
 			echo "2"
 			exit 0
 		;;
-    	*)
+        *)
 			# is the parameter existing directory
 			echo "Invalid parameter \"$key\"." >&2
 			exit 1
@@ -488,6 +466,7 @@ while [ $# -ge 1 ]
 	esac
 	shift
 done
+
 
 
 # mysql -u "$OSD_USERNAME" -D "$OSD_DB" --password="$OSD_PASSWORD"< test.sql
