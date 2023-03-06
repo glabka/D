@@ -1,1 +1,0 @@
-Ve složce musí být soubor, aby ji git přidal k repozitáři, tak tady nějaký vytvářím
